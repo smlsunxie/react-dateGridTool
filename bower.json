@@ -7,19 +7,15 @@
     "schedule",
     "datetimepicker"
   ],
-
   "authors": [
     "smlsunxie",
     "mak"
   ],
-  
   "license": "MIT",
-
   "main": [
     "dist/dateGridTool.css",
     "dist/dateGridTool.js"
   ],
-
   "ignore": [
     "**/.*",
     "node_modules",
@@ -28,6 +24,6 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "~1.2.18"
+    "react": "~0.11.2"
   }
 }

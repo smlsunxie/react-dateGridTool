@@ -37,7 +37,7 @@ module.exports = (grunt) ->
         files: [
           expand: true
           cwd: "src/"
-          src: "*.css"
+          src: "*.{jsx,css}"
           dest: "dist/"
           filter: "isFile"
         ]
@@ -65,7 +65,7 @@ module.exports = (grunt) ->
           livereload: true
 
         files: [
-          "src/**/*.{coffee,jade,css}"
+          "src/**/*.{jsx,jade,css}"
         ]
         tasks: [
           "build"
