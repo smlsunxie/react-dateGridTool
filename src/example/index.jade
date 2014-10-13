@@ -1,0 +1,11 @@
+html
+head
+  title
+  meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+  link(rel='stylesheet', href='dist/dateGridTool.css')
+  script(src='http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular.js', type='text/javascript', charset='utf-8')
+  script(src='dist/dateGridTool.js')
+  script(src='main.js')
+
+body(ng-app='demo', ng-controller='demoCtrl')
+  date-grid-tool(date-grid="dateGrid")

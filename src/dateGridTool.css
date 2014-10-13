@@ -1,0 +1,145 @@
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.fcb {
+  color: #333;
+}
+.fwn {
+  font-weight: normal;
+}
+.fsm {
+  font-size: 11px;
+}
+.clearfix {
+  zoom: 1;
+}
+._52t2 {
+  margin-left: 96px;
+  margin-top: 5px;
+}
+._8-y {
+  border-right: 1px solid white;
+  float: left;
+  font-weight: bold;
+  padding-bottom: 5px;
+  width: 43px;
+}
+._8-z {
+  border-right: 1px solid white;
+  float: left;
+  height: 1px;
+  width: 1px;
+}
+._8_p {
+  border-left: 1px solid white;
+  float: left;
+  font-weight: bold;
+  margin-left: 5px;
+  padding-bottom: 5px;
+  width: 100px;
+}
+._516l {
+  float: left;
+}
+._516q {
+  height: 30px;
+  line-height: 30px;
+  text-align: right;
+  width: 96px;
+}
+
+._516r {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+._8-v ._516m {
+  border-top: 1px solid #bdbfc4;
+}
+
+._516n {
+  border-left: 1px solid #bdbfc4;
+  border-right: 1px solid #fff;
+}
+
+._516p {
+  border-right: 1px solid #fff;
+}
+
+._516o {
+  border-right: 1px solid #bdbfc4;
+}
+
+
+._8-v ._8-w {
+  border-top: 1px solid #bdbfc4;
+}
+._8-w {
+  background-color: #fff;
+  border-bottom: 1px solid #bdbfc4;
+  border-left: 1px solid #bdbfc4;
+  border-right: 1px solid #bdbfc4;
+  cursor: pointer;
+  float: left;
+  height: 30px;
+  margin-left: 4px;
+  width: 45px;
+}
+
+
+
+._8-x ._516m {
+  background-color: #fff;
+  border-top: 1px solid #bdbfc4;
+}
+._516m {
+  background-color: #f1f2f6;
+  border-bottom: 1px solid #bdbfc4;
+  cursor: pointer;
+  height: 30px;
+  width: 15px;
+}
+
+._496o {
+  margin-top: 8px;
+}
+.hourStatus-selected {
+  background: -webkit-gradient(linear, center top, center bottom, from(#6279ae), to(#5870a8));
+  background: -webkit-linear-gradient(top, #6279ae, #5870a8);
+  background-color: #5870a8;
+  border-right: 1px solid #6d84b4;
+}
+._496q {
+  float: left;
+  height: 15px;
+  margin-left: 96px;
+  margin-right: 8px;
+  margin-top: -1px;
+  width: 15px;
+}
+
+
+._8-x ._516n {
+  border-right: 1px solid lightgrey;
+}
+
+._8-x ._516p {
+  border-right: 1px solid lightgrey;
+}
+
+._8-x {
+  margin-top: 4px;
+}
+
+.bt-day-parting-grid-view{
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+}
