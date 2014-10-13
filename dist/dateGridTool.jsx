@@ -11,6 +11,13 @@ var DateCell = React.createClass({
     if(this.state.selected === false)
       this.setState({selected: true});
     else this.setState({selected: false});
+
+    this.props.handleHourMouseDown(this)
+  },
+
+  hourMouseOver: function(){
+
+    this.props.handleHourMouseOver(this)
   },
 
   render: function() {
@@ -26,10 +33,10 @@ var DateCell = React.createClass({
     if(selectdClassName !== "") className += " " + selectdClassName;
 
 
-    return <div id="hourGrid" onMouseDown={this.hourMouseDown} mouseover="hourMouseOver(hour)" className={className}></div>;
+    return <div id="hourGrid" onMouseDown={this.hourMouseDown} onMouseOver={this.hourMouseOver} className={className}></div>;
   }
 });
-
+//
 var DateRow = React.createClass({
 
 
@@ -37,7 +44,7 @@ var DateRow = React.createClass({
 
     var hours = []
     for (var i = 0; i < 24; i++) {
-      hours.push(<DateCell day={this.props.day} hour={i} handleHourMouseDown={this.props.handleHourMouseDown} startHour={this.props.start} />);
+      hours.push(<DateCell day={this.props.day} hour={i} handleHourMouseDown={this.props.handleHourMouseDown} handleHourMouseOver={this.props.handleHourMouseOver} />);
     }
 
     var className = ""
@@ -65,16 +72,24 @@ var DateRow = React.createClass({
 var DateGridToolApp = React.createClass({
   getInitialState: function() {
     return {
-      startHour: {},
-      overHour: {}
+      startHour: null,
+      overHour: null
     };
   },
 
   handleHourMouseDown: function(hour){
+
     this.setState({startHour: hour});
   },
   handleHourMouseOver: function(hour){
-    this.setState({overHour: hour});
+    if (this.state.startHour === null)
+      return
+
+
+    hour.setState({selected: true});
+
+
+
   },
 
 
@@ -111,7 +126,7 @@ var DateGridToolApp = React.createClass({
           <div className="_8-z"></div>
           <div className="_8_p">All Day</div>
         </div>
-        <DateRow day="0" title="Monday" handleHourMouseDown={this.handleHourMouseDown} startHour={this.state.start} />
+        <DateRow day="0" title="Monday" handleHourMouseDown={this.handleHourMouseDown} handleHourMouseOver={this.handleHourMouseOver} />
         <DateRow day="1" title="Tuesday" />
         <DateRow day="2" title="Wednesday" />
         <DateRow day="3" title="Thursday" />
