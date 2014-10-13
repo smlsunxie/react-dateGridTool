@@ -1,12 +1,16 @@
 /** @jsx React.DOM */
 var DateCell = React.createClass({
+  getInitialState: function() {
 
+    return {
+      selected: false
+    };
+  },
 
   hourMouseDown: function(){
-    console.log("111");
-    if(this.props.selected === false)
-      this.setProps({selected: true});
-    else this.setProps({selected: false});
+    if(this.state.selected === false)
+      this.setState({selected: true});
+    else this.setState({selected: false});
   },
 
   render: function() {
@@ -18,7 +22,7 @@ var DateCell = React.createClass({
 
 
     var selectdClassName = "";
-    if(this.props.selected === true) selectdClassName = "hourStatus-selected"
+    if(this.state.selected === true) selectdClassName = "hourStatus-selected"
     if(selectdClassName !== "") className += " " + selectdClassName;
 
 
@@ -31,18 +35,15 @@ var DateRow = React.createClass({
 
   render: function() {
 
+    var hours = []
+    for (var i = 0; i < 24; i++) {
+      hours.push(<DateCell day={this.props.day} hour={i} handleHourMouseDown={this.props.handleHourMouseDown} startHour={this.props.start} />);
+    }
 
     var className = ""
     if(this.props.day == 0) className = "_8-v _516k clearfix";
     else if(this.props.day == 7) className = "_8-x _516k clearfix";
     else className = "_516k clearfix";
-
-    var hours = []
-
-
-    for (var i = 0; i < this.props.hours.length; i++) {
-      hours.push(DateCell(this.props.hours[i]));
-    }
 
 
     return (
@@ -63,34 +64,10 @@ var DateRow = React.createClass({
 
 var DateGridToolApp = React.createClass({
   getInitialState: function() {
-    var initObject = {
-      week: [
-        { title: "Monday", hours: [], allday: {}}
-        , { title: "Tuesday", hours: [], allday: {}}
-        , { title: "Wednesday", hours: [], allday: {}}
-        , { title: "Thursday", hours: [], allday: {}}
-        , { title: "Friday", hours: [], allday: {}}
-        , { title: "Saturday", hours: [], allday: {}}
-        , { title: "Sunday", hours: [], allday: {}
-        }
-      ],
-      everyday: {
-        title: "Everyday",
-        hours: []
-      },
-
+    return {
       startHour: {},
       overHour: {}
-    }
-
-    for (var i = 0; i < initObject.week.length; i++) {
-      for (var j = 0; j < 24; j++) {
-        initObject.week[i].hours.push({day:i, hour:j, selected: false});
-      }
-    }
-
-
-    return initObject;
+    };
   },
 
   handleHourMouseDown: function(hour){
@@ -102,12 +79,6 @@ var DateGridToolApp = React.createClass({
 
 
   render: function() {
-
-    var dateGrid = []
-
-    for (var i = 0; i < this.state.week.length; i++) {
-      dateGrid.push(DateRow(this.state.week[i]));
-    }
 
 
     return (
@@ -140,7 +111,13 @@ var DateGridToolApp = React.createClass({
           <div className="_8-z"></div>
           <div className="_8_p">All Day</div>
         </div>
-        {dateGrid}
+        <DateRow day="0" title="Monday" handleHourMouseDown={this.handleHourMouseDown} startHour={this.state.start} />
+        <DateRow day="1" title="Tuesday" />
+        <DateRow day="2" title="Wednesday" />
+        <DateRow day="3" title="Thursday" />
+        <DateRow day="4" title="Friday" />
+        <DateRow day="5" title="Saturday" />
+        <DateRow day="6" title="Sunday" />
 
       </div>
     );
