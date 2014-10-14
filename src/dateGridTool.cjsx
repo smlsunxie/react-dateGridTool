@@ -14,8 +14,8 @@ DateCell = React.createClass(
     @props.handleHourMouseUp this
     return
 
-  setSelected: (selected) ->
-    @setState selected: selected
+  setSelected:(selected) ->
+    @props.setSelected this, selected
 
   render: ->
 
@@ -29,6 +29,8 @@ DateCell = React.createClass(
     selectdClassName = ""
     selectdClassName = "hourStatus-selected"  if @props.selected is true
 
+    @setSelected(@props.selected)
+
     className += " " + selectdClassName  if selectdClassName isnt ""
 
     app = div(
@@ -36,6 +38,7 @@ DateCell = React.createClass(
       onMouseDown: @hourMouseDown
       onMouseOver: @hourMouseOver
       onMouseUp: @hourMouseUp
+      onClick: @hourMouseUp
       className: className
       ref: "day_#{@props.day}_hour_#{@props.hour}"
     )
@@ -68,9 +71,30 @@ DateRow = React.createClass(render: ->
 DateGridToolApp = React.createClass(
 
   getInitialState: ->
+
+    result = [
+      {title: "Monday", day: 0, hours: []}
+      {title: "Tuesday", day: 1, hours: []}
+      {title: "Wednesday", day: 2, hours: []}
+      {title: "Thursday", day: 3, hours: []}
+      {title: "Friday", day: 4, hours: []}
+      {title: "Saturday", day: 5, hours: []}
+      {title: "Sunday", day: 6, hours: []}
+    ]
+
+
+    [0..6].forEach (dayId) ->
+      [0..23].forEach (hourId) ->
+        result[dayId].hours.push(
+          day: dayId
+          hour: hourId
+          selected: false
+        )
+
     return {
       startHour: null
       endHour: null
+      result: result
     }
 
   handleHourMouseDown: (hour) ->
@@ -86,32 +110,29 @@ DateGridToolApp = React.createClass(
   handleHourMouseUp: (hour) ->
     @setState {startHour: null, endHour: null}
 
+  setSelected: (hour, selected) ->
+    @state.result[hour.props.day].hours[hour.props.hour].selected = selected
 
 
   render: ->
     that = this
 
-    week = [
-      {title: "Monday", day: 0}
-      {title: "Tuesday", day: 1}
-      {title: "Wednesday", day: 2}
-      {title: "Thursday", day: 3}
-      {title: "Friday", day: 4}
-      {title: "Saturday", day: 5}
-      {title: "Sunday", day: 6}
-    ]
 
-    days = week.map (day) ->
+    days = [0..6].map (day) ->
+      dayObj =
+         day: day
+         title: that.state.result[day].title
 
-      day.hours = [0..23].map (hourId) ->
+      dayObj.hours = [0..23].map (hour) ->
 
         hourObj =
-          day: day.day
-          hour: hourId
+          day: day
+          hour: hour
           handleHourMouseDown: that.handleHourMouseDown
           handleHourMouseOver: that.handleHourMouseOver
           handleHourMouseUp: that.handleHourMouseUp
-          selected: false
+          setSelected: that.setSelected
+          selected: that.state.result[day].hours[hour].selected
 
 
         if that.state.startHour isnt null && that.state.endHour isnt null
@@ -121,10 +142,11 @@ DateGridToolApp = React.createClass(
             for h in [that.state.startHour.hour..that.state.endHour.hour]
               hourObj.selected = true if hourObj.day is d && hourObj.hour is h
 
-        
+
+
         return DateCell(hourObj)
 
-      return DateRow(day)
+      return DateRow(dayObj)
 
 
 
@@ -161,4 +183,6 @@ DateGridToolApp = React.createClass(
 
     return app
 )
-React.renderComponent DateGridToolApp(), document.getElementById("test")
+dateGridToolApp = DateGridToolApp()
+
+React.renderComponent dateGridToolApp, document.getElementById("test")

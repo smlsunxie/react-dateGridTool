@@ -1,5 +1,5 @@
 (function() {
-  var DateCell, DateGridToolApp, DateRow, div;
+  var DateCell, DateGridToolApp, DateRow, dateGridToolApp, div;
 
   div = React.DOM.div;
 
@@ -14,9 +14,7 @@
       this.props.handleHourMouseUp(this);
     },
     setSelected: function(selected) {
-      return this.setState({
-        selected: selected
-      });
+      return this.props.setSelected(this, selected);
     },
     render: function() {
       var app, className, selectdClassName;
@@ -34,6 +32,7 @@
       if (this.props.selected === true) {
         selectdClassName = "hourStatus-selected";
       }
+      this.setSelected(this.props.selected);
       if (selectdClassName !== "") {
         className += " " + selectdClassName;
       }
@@ -42,6 +41,7 @@
         onMouseDown: this.hourMouseDown,
         onMouseOver: this.hourMouseOver,
         onMouseUp: this.hourMouseUp,
+        onClick: this.hourMouseUp,
         className: className,
         ref: "day_" + this.props.day + "_hour_" + this.props.hour
       });
@@ -80,9 +80,56 @@
 
   DateGridToolApp = React.createClass({
     getInitialState: function() {
+      var result;
+      result = [
+        {
+          title: "Monday",
+          day: 0,
+          hours: []
+        }, {
+          title: "Tuesday",
+          day: 1,
+          hours: []
+        }, {
+          title: "Wednesday",
+          day: 2,
+          hours: []
+        }, {
+          title: "Thursday",
+          day: 3,
+          hours: []
+        }, {
+          title: "Friday",
+          day: 4,
+          hours: []
+        }, {
+          title: "Saturday",
+          day: 5,
+          hours: []
+        }, {
+          title: "Sunday",
+          day: 6,
+          hours: []
+        }
+      ];
+      [0, 1, 2, 3, 4, 5, 6].forEach(function(dayId) {
+        var _i, _results;
+        return (function() {
+          _results = [];
+          for (_i = 0; _i <= 23; _i++){ _results.push(_i); }
+          return _results;
+        }).apply(this).forEach(function(hourId) {
+          return result[dayId].hours.push({
+            day: dayId,
+            hour: hourId,
+            selected: false
+          });
+        });
+      });
       return {
         startHour: null,
-        endHour: null
+        endHour: null,
+        result: result
       };
     },
     handleHourMouseDown: function(hour) {
@@ -104,48 +151,32 @@
         endHour: null
       });
     },
+    setSelected: function(hour, selected) {
+      return this.state.result[hour.props.day].hours[hour.props.hour].selected = selected;
+    },
     render: function() {
-      var app, days, that, week;
+      var app, days, that;
       that = this;
-      week = [
-        {
-          title: "Monday",
-          day: 0
-        }, {
-          title: "Tuesday",
-          day: 1
-        }, {
-          title: "Wednesday",
-          day: 2
-        }, {
-          title: "Thursday",
-          day: 3
-        }, {
-          title: "Friday",
-          day: 4
-        }, {
-          title: "Saturday",
-          day: 5
-        }, {
-          title: "Sunday",
-          day: 6
-        }
-      ];
-      days = week.map(function(day) {
-        var _i, _results;
-        day.hours = (function() {
+      days = [0, 1, 2, 3, 4, 5, 6].map(function(day) {
+        var dayObj, _i, _results;
+        dayObj = {
+          day: day,
+          title: that.state.result[day].title
+        };
+        dayObj.hours = (function() {
           _results = [];
           for (_i = 0; _i <= 23; _i++){ _results.push(_i); }
           return _results;
-        }).apply(this).map(function(hourId) {
+        }).apply(this).map(function(hour) {
           var d, h, hourObj, _i, _j, _ref, _ref1, _ref2, _ref3;
           hourObj = {
-            day: day.day,
-            hour: hourId,
+            day: day,
+            hour: hour,
             handleHourMouseDown: that.handleHourMouseDown,
             handleHourMouseOver: that.handleHourMouseOver,
             handleHourMouseUp: that.handleHourMouseUp,
-            selected: false
+            setSelected: that.setSelected,
+            selected: that.state.result[day].hours[hour].selected
           };
           if (that.state.startHour !== null && that.state.endHour !== null) {
             for (d = _i = _ref = that.state.startHour.day, _ref1 = that.state.endHour.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
@@ -158,7 +189,7 @@
           }
           return DateCell(hourObj);
         });
-        return DateRow(day);
+        return DateRow(dayObj);
       });
       app = div({
         className: "bt-view bt-view bt-day-parting-grid-view"
@@ -221,6 +252,8 @@
     }
   });
 
-  React.renderComponent(DateGridToolApp(), document.getElementById("test"));
+  dateGridToolApp = DateGridToolApp();
+
+  React.renderComponent(dateGridToolApp, document.getElementById("test"));
 
 }).call(this);
