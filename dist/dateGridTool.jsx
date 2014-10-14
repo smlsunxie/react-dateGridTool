@@ -4,19 +4,15 @@
   div = React.DOM.div;
 
   DateCell = React.createClass({
-    getInitialState: function() {
-      return {
-        selected: false
-      };
-    },
     hourMouseDown: function() {
-      if (this.state.selected === false) {
-        this.setSelected(true);
-      } else {
-        this.setSelected(false);
-      }
+      this.props.handleHourMouseDown(this);
     },
-    hourMouseOver: function() {},
+    hourMouseOver: function() {
+      this.props.handleHourMouseOver(this);
+    },
+    hourMouseUp: function() {
+      this.props.handleHourMouseUp(this);
+    },
     setSelected: function(selected) {
       return this.setState({
         selected: selected
@@ -35,7 +31,7 @@
         className = "_516o _516l _516m";
       }
       selectdClassName = "";
-      if (this.state.selected === true) {
+      if (this.props.selected === true) {
         selectdClassName = "hourStatus-selected";
       }
       if (selectdClassName !== "") {
@@ -45,6 +41,7 @@
         id: "hourGrid",
         onMouseDown: this.hourMouseDown,
         onMouseOver: this.hourMouseOver,
+        onMouseUp: this.hourMouseUp,
         className: className,
         ref: "day_" + this.props.day + "_hour_" + this.props.hour
       });
@@ -82,17 +79,30 @@
   });
 
   DateGridToolApp = React.createClass({
+    getInitialState: function() {
+      return {
+        startHour: null,
+        endHour: null
+      };
+    },
     handleHourMouseDown: function(hour) {
-      this.setState({
-        startHour: hour
+      return this.setState({
+        startHour: hour.props
       });
     },
     handleHourMouseOver: function(hour) {
       if (this.state.startHour === null) {
-        return hour.setState({
-          selected: true
-        });
+        return;
       }
+      return this.setState({
+        endHour: hour.props
+      });
+    },
+    handleHourMouseUp: function(hour) {
+      return this.setState({
+        startHour: null,
+        endHour: null
+      });
     },
     render: function() {
       var app, days, that, week;
@@ -123,17 +133,30 @@
       ];
       days = week.map(function(day) {
         var _i, _results;
-        day.handleHourMouseDown = that.handleHourMouseDown;
-        day.handleHourMouseOver = that.handleHourMouseOver;
         day.hours = (function() {
           _results = [];
           for (_i = 0; _i <= 23; _i++){ _results.push(_i); }
           return _results;
-        }).apply(this).map(function(hour) {
-          return DateCell({
+        }).apply(this).map(function(hourId) {
+          var d, h, hourObj, _i, _j, _ref, _ref1, _ref2, _ref3;
+          hourObj = {
             day: day.day,
-            hour: hour
-          });
+            hour: hourId,
+            handleHourMouseDown: that.handleHourMouseDown,
+            handleHourMouseOver: that.handleHourMouseOver,
+            handleHourMouseUp: that.handleHourMouseUp,
+            selected: false
+          };
+          if (that.state.startHour !== null && that.state.endHour !== null) {
+            for (d = _i = _ref = that.state.startHour.day, _ref1 = that.state.endHour.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
+              for (h = _j = _ref2 = that.state.startHour.hour, _ref3 = that.state.endHour.hour; _ref2 <= _ref3 ? _j <= _ref3 : _j >= _ref3; h = _ref2 <= _ref3 ? ++_j : --_j) {
+                if (hourObj.day === d && hourObj.hour === h) {
+                  hourObj.selected = true;
+                }
+              }
+            }
+          }
+          return DateCell(hourObj);
         });
         return DateRow(day);
       });

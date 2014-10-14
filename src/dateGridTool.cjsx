@@ -1,32 +1,33 @@
 
 div = React.DOM.div
 DateCell = React.createClass(
-  getInitialState: ->
-    selected: false
+
 
   hourMouseDown: ->
-    if @state.selected is false
-      @setSelected(true)
-    else
-      @setSelected(false)
-    # @props.handleHourMouseDown this
+    @props.handleHourMouseDown this
     return
 
   hourMouseOver: ->
-    # @props.handleHourMouseOver this
+    @props.handleHourMouseOver this
+    return
+  hourMouseUp: ->
+    @props.handleHourMouseUp this
     return
 
   setSelected: (selected) ->
     @setState selected: selected
 
   render: ->
+
+
+
     className = ""
     className = "_516n _516l _516m"  if @props.hour % 3 is 0
     className = "_516p _516l _516m"  if @props.hour % 3 is 1
     className = "_516o _516l _516m"  if @props.hour % 3 is 2
 
     selectdClassName = ""
-    selectdClassName = "hourStatus-selected"  if @state.selected is true
+    selectdClassName = "hourStatus-selected"  if @props.selected is true
 
     className += " " + selectdClassName  if selectdClassName isnt ""
 
@@ -34,6 +35,7 @@ DateCell = React.createClass(
       id: "hourGrid"
       onMouseDown: @hourMouseDown
       onMouseOver: @hourMouseOver
+      onMouseUp: @hourMouseUp
       className: className
       ref: "day_#{@props.day}_hour_#{@props.hour}"
     )
@@ -44,9 +46,6 @@ DateCell = React.createClass(
 #
 DateRow = React.createClass(render: ->
   that = @
-
-
-
 
   className = ""
   className = "_8-v _516k clearfix" if @props.day is 0
@@ -67,12 +66,27 @@ DateRow = React.createClass(render: ->
   return app
 )
 DateGridToolApp = React.createClass(
+
+  getInitialState: ->
+    return {
+      startHour: null
+      endHour: null
+    }
+
   handleHourMouseDown: (hour) ->
-    @setState startHour: hour
-    return
+
+    @setState startHour: hour.props
+
 
   handleHourMouseOver: (hour) ->
-    hour.setState selected: true  if @state.startHour is null
+    return if @state.startHour is null
+    @setState endHour: hour.props
+
+
+  handleHourMouseUp: (hour) ->
+    @setState {startHour: null, endHour: null}
+
+
 
   render: ->
     that = this
@@ -88,17 +102,32 @@ DateGridToolApp = React.createClass(
     ]
 
     days = week.map (day) ->
-      day.handleHourMouseDown = that.handleHourMouseDown
-      day.handleHourMouseOver = that.handleHourMouseOver
 
+      day.hours = [0..23].map (hourId) ->
 
-      day.hours = [0..23].map (hour) ->
-        return DateCell(
+        hourObj =
           day: day.day
-          hour: hour
-        )
+          hour: hourId
+          handleHourMouseDown: that.handleHourMouseDown
+          handleHourMouseOver: that.handleHourMouseOver
+          handleHourMouseUp: that.handleHourMouseUp
+          selected: false
+
+
+        if that.state.startHour isnt null && that.state.endHour isnt null
+
+
+          for d in [that.state.startHour.day..that.state.endHour.day]
+            for h in [that.state.startHour.hour..that.state.endHour.hour]
+              hourObj.selected = true if hourObj.day is d && hourObj.hour is h
+
+        
+        return DateCell(hourObj)
 
       return DateRow(day)
+
+
+
 
     app = div(className: "bt-view bt-view bt-day-parting-grid-view", [
       div(className: "_52t2 clearfix"  , [
