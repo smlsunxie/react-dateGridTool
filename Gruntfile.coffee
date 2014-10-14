@@ -21,11 +21,21 @@ module.exports = (grunt) ->
           bare: false
         },
         files: {
-          'dist/dateGridTool.js': 'temp/dateGridTool.coffee'
+          'dist/dateGridTool.js': 'src/dateGridTool.coffee'
           'example/main.js': 'src/example/main.coffee'
         }
       }
-    }
+    },
+
+    cjsx: {
+      compile: {
+        files: {
+          'dist/dateGridTool.jsx': 'src/dateGridTool.cjsx'
+        }
+      }
+    },
+
+
 
     clean:
       dist: "dist/*"
@@ -37,7 +47,7 @@ module.exports = (grunt) ->
         files: [
           expand: true
           cwd: "src/"
-          src: "*.{jsx,css}"
+          src: "*.css"
           dest: "dist/"
           filter: "isFile"
         ]
@@ -65,7 +75,7 @@ module.exports = (grunt) ->
           livereload: true
 
         files: [
-          "src/**/*.{jsx,jade,css}"
+          "src/**/*.{cjsx,jade,css}"
         ]
         tasks: [
           "build"
@@ -83,19 +93,6 @@ module.exports = (grunt) ->
     }
 
 
-    "string-replace":
-      dev:
-        files:
-          'temp/dateGridTool.coffee': 'src/dateGridTool.coffee'
-
-        options:
-          replacements: [
-            {
-              pattern: "{html}",
-              replacement: (match, p1, offset, string) ->
-                return grunt.file.read('dist/dateGridTool.html');
-            }
-          ]
 
 
 
@@ -112,8 +109,8 @@ module.exports = (grunt) ->
   grunt.registerTask "build", [
     "clean"
     "jade"
-    "string-replace"
     "coffee"
+    "cjsx"
     "copy:build"
     "copy:example"
   ]

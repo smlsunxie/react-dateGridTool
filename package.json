@@ -1,22 +1,24 @@
 {
   "name": "ng-date-grid-tool",
   "version": "0.0.1",
-  "dependencies": {},
+
   "devDependencies": {
     "grunt": "~0.4.1",
-    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-coffee": "~0.10.1",
     "grunt-contrib-watch": "~0.5.1",
-    "grunt-contrib-jade": "~0.8.0",
+    "grunt-contrib-jade": "^0.11.0",
     "grunt-string-replace": "~0.2.7",
     "grunt-contrib-connect": "~0.5.0",
-    "grunt-contrib-coffee": "~0.10.1",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-clean": "~0.5.0",
     "coffee-script": "~1.7.1",
     "matchdep": "~0.3.0",
-    "grunt-contrib-jade": "^0.11.0",
-    "grunt-string-replace": "~0.2.7"
+    "grunt-coffee-react": "~1.0.1"
   },
-  "keywords":["angularjs","datetime","schedule"],
-  "licence":"MIT"
+  "keywords": [
+    "angularjs",
+    "datetime",
+    "schedule"
+  ],
+  "licence": "MIT"
 }
