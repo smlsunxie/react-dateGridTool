@@ -1,4 +1,5 @@
 /** @jsx React.DOM */
+var div = React.DOM.div;
 var DateCell = React.createClass({
   getInitialState: function() {
 
@@ -32,8 +33,9 @@ var DateCell = React.createClass({
     if(this.state.selected === true) selectdClassName = "hourStatus-selected"
     if(selectdClassName !== "") className += " " + selectdClassName;
 
+    app = div({id:"hourGrid", onMouseDown: this.hourMouseDown, onMouseOver: this.hourMouseOver, className: className})
 
-    return <div id="hourGrid" onMouseDown={this.hourMouseDown} onMouseOver={this.hourMouseOver} className={className}></div>;
+    return app;
   }
 });
 //
@@ -53,17 +55,17 @@ var DateRow = React.createClass({
     else className = "_516k clearfix";
 
 
-    return (
-      <div className={className}>
-        <div className="bt-view bt-view _516l _516q">
-          <div className="_516r">{this.props.title}</div>
-        </div>
 
-        <div className="bt-view bt-view">
-          {hours}
-        </div>
-      </div>
-    );
+
+    app = div({className: className},[
+      div({className:"bt-view bt-view _516l _516q"},
+        div({className:"_516r"}, this.props.title)
+      ),
+      div({className:"bt-view bt-view"}, hours)
+    ])
+
+
+    return app;
   }
 });
 
@@ -95,47 +97,47 @@ var DateGridToolApp = React.createClass({
 
   render: function() {
 
+    var app = div({className: "bt-view bt-view bt-day-parting-grid-view"},[
+        div({className: "_52t2 clearfix"},[
+          div({className: "_8-y"}, "12am"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
 
-    return (
+          div({className: "_8-y"}, "3am"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
 
-      <div className="bt-view bt-view bt-day-parting-grid-view">
-        <div className="_52t2 clearfix">
-          <div className="_8-y">12am</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">3am</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">6am</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">9am</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">12pm</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">3pm</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">6pm</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8-y">9pm</div>
-          <div className="_8-z"></div>
-          <div className="_8-z"></div>
-          <div className="_8_p">All Day</div>
-        </div>
-        <DateRow day="0" title="Monday" handleHourMouseDown={this.handleHourMouseDown} handleHourMouseOver={this.handleHourMouseOver} />
-        <DateRow day="1" title="Tuesday" />
-        <DateRow day="2" title="Wednesday" />
-        <DateRow day="3" title="Thursday" />
-        <DateRow day="4" title="Friday" />
-        <DateRow day="5" title="Saturday" />
-        <DateRow day="6" title="Sunday" />
+          div({className: "_8-y"}, "6am"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
 
-      </div>
+          div({className: "_8-y"}, "9am"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
+
+          div({className: "_8-y"}, "12pm"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
+
+          div({className: "_8-y"}, "3pm"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
+
+          div({className: "_8-y"}, "6pm"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, ""),
+
+          div({className: "_8-y"}, "9pm"),
+          div({className: "_8-z"}, ""),
+          div({className: "_8-z"}, "")
+        ]),
+        DateRow({day:"0", title:"Monday", handleHourMouseDown:this.handleHourMouseDown, handleHourMouseOver: this.handleHourMouseOver})
+
+
+      ]
     );
+
+    return app;
   }
 });
 
