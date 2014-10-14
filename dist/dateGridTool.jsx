@@ -11,18 +11,16 @@
     },
     hourMouseDown: function() {
       if (this.state.selected === false) {
-        this.setState({
-          selected: true
-        });
+        this.setSelected(true);
       } else {
-        this.setState({
-          selected: false
-        });
+        this.setSelected(false);
       }
-      this.props.handleHourMouseDown(this);
     },
-    hourMouseOver: function() {
-      this.props.handleHourMouseOver(this);
+    hourMouseOver: function() {},
+    setSelected: function(selected) {
+      return this.setState({
+        selected: selected
+      });
     },
     render: function() {
       var app, className, selectdClassName;
@@ -47,7 +45,8 @@
         id: "hourGrid",
         onMouseDown: this.hourMouseDown,
         onMouseOver: this.hourMouseOver,
-        className: className
+        className: className,
+        ref: "day_" + this.props.day + "_hour_" + this.props.hour
       });
       return app;
     }
@@ -55,16 +54,8 @@
 
   DateRow = React.createClass({
     render: function() {
-      var app, className, hours, i, _i;
-      hours = [];
-      for (i = _i = 0; _i <= 23; i = ++_i) {
-        hours.push(DateCell({
-          day: this.props.day,
-          hour: i,
-          handleHourMouseDown: this.props.handleHourMouseDown,
-          handleHourMouseOver: this.props.handleHourMouseOver
-        }));
-      }
+      var app, className, that;
+      that = this;
       className = "";
       if (this.props.day === 0) {
         className = "_8-v _516k clearfix";
@@ -84,19 +75,13 @@
           className: "_516r"
         }, this.props.title)), div({
           className: "bt-view bt-view"
-        }, hours)
+        }, this.props.hours)
       ]);
       return app;
     }
   });
 
   DateGridToolApp = React.createClass({
-    getInitialState: function() {
-      return {
-        startHour: null,
-        overHour: null
-      };
-    },
     handleHourMouseDown: function(hour) {
       this.setState({
         startHour: hour
@@ -110,7 +95,7 @@
       }
     },
     render: function() {
-      var app, that, week;
+      var app, days, that, week;
       that = this;
       week = [
         {
@@ -136,6 +121,22 @@
           day: 6
         }
       ];
+      days = week.map(function(day) {
+        var _i, _results;
+        day.handleHourMouseDown = that.handleHourMouseDown;
+        day.handleHourMouseOver = that.handleHourMouseOver;
+        day.hours = (function() {
+          _results = [];
+          for (_i = 0; _i <= 23; _i++){ _results.push(_i); }
+          return _results;
+        }).apply(this).map(function(hour) {
+          return DateCell({
+            day: day.day,
+            hour: hour
+          });
+        });
+        return DateRow(day);
+      });
       app = div({
         className: "bt-view bt-view bt-day-parting-grid-view"
       }, [
@@ -191,11 +192,7 @@
           }, ""), div({
             className: "_8-z"
           }, "")
-        ]), div(null, week.map(function(day) {
-          day.handleHourMouseDown = that.handleHourMouseDown;
-          day.handleHourMouseOver = that.handleHourMouseOver;
-          return DateRow(day);
-        }))
+        ]), div(null, days)
       ]);
       return app;
     }
