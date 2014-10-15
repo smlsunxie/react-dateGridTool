@@ -1,5 +1,6 @@
 (function() {
-  var DateCell, DateGridToolApp, DateRow, dataObj, dateGridToolApp, div;
+  var DateCell, DateGridToolApp, DateRow, dataObj, dateGridToolApp, div,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   div = React.DOM.div;
 
@@ -112,40 +113,44 @@
       });
     },
     handleHourMouseOver: function(hour) {
-      var d, h, hourLocal, _i, _j, _ref, _ref1, _ref2, _ref3;
+      var changeHour, d, h, hourLocal, that, _i, _j, _ref, _ref1, _ref2, _ref3;
+      that = this;
       if (this.state.startHour === null) {
         return;
       }
       this.state.endHour = hour;
-      console.log("@state.endHour", this.state.endHour);
       if (this.state.startHour !== null && this.state.endHour !== null) {
         this.state.startHour.selected = !this.state.startHour.selected;
+        changeHour = [];
         for (d = _i = _ref = this.state.startHour.day, _ref1 = this.state.endHour.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
           for (h = _j = _ref2 = this.state.startHour.hour, _ref3 = this.state.endHour.hour; _ref2 <= _ref3 ? _j <= _ref3 : _j >= _ref3; h = _ref2 <= _ref3 ? ++_j : --_j) {
             hourLocal = this.state.result[d].hours[h];
             if (hourLocal.day === d && hourLocal.hour === h) {
-              hourLocal.selected = this.state.selected;
-            } else {
-              hourLocal.selected = hourLocal.orgSelected;
+              changeHour.push(hourLocal);
             }
           }
         }
+        this.state.result.map(function(day) {
+          return day.hours.map(function(hour) {
+            if (__indexOf.call(changeHour, hour) >= 0) {
+              return hour.selected = that.state.selected;
+            } else {
+              return hour.selected = hour.orgSelected;
+            }
+          });
+        });
       }
-      console.log("@state.result[0].hours[1]", this.state.result[0].hours[1]);
       return this.setState({
         endHour: this.state.endHour,
         result: this.state.result
       });
     },
     handleHourMouseUp: function(hour) {
-      var updateAllOrgSelected;
-      updateAllOrgSelected = function() {
-        return this.state.result.forEach(function(day) {
-          return day.hour.forEach(function(hour) {
-            return hour.orgSelected = hour.selected;
-          });
+      this.state.result.forEach(function(day) {
+        return day.hours.forEach(function(hour) {
+          return hour.orgSelected = hour.selected;
         });
-      };
+      });
       return this.setState({
         startHour: null,
         endHour: null,

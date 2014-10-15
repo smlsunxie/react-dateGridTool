@@ -95,37 +95,44 @@ DateGridToolApp = React.createClass(
 
 
   handleHourMouseOver: (hour) ->
+    that = this
     return if @state.startHour is null
     @state.endHour = hour
-
-    console.log "@state.endHour", @state.endHour
 
     if @state.startHour isnt null && @state.endHour isnt null
 
       @state.startHour.selected = !@state.startHour.selected
 
+      changeHour = []
+
       for d in [@state.startHour.day..@state.endHour.day]
         for h in [@state.startHour.hour..@state.endHour.hour]
-
           hourLocal = @state.result[d].hours[h]
-
           if hourLocal.day is d && hourLocal.hour is h
+            changeHour.push hourLocal
 
-            hourLocal.selected = @state.selected
+      @state.result.map (day) ->
+        day.hours.map (hour) ->
+
+          if hour in changeHour
+            hour.selected = that.state.selected
           else
-            hourLocal.selected = hourLocal.orgSelected
+            hour.selected = hour.orgSelected
 
-    console.log "@state.result[0].hours[1]", @state.result[0].hours[1]
+
     @setState {endHour: @state.endHour, result: @state.result}
 
 
   handleHourMouseUp: (hour) ->
-    updateAllOrgSelected = () ->
-      @state.result.forEach (day) ->
-        day.hour.forEach (hour) ->
-          hour.orgSelected = hour.selected
+    @state.result.forEach (day) ->
+      day.hours.forEach (hour) ->
+        hour.orgSelected = hour.selected
 
     @setState {startHour: null, endHour: null, result: @state.result}
+
+
+
+
 
 
   render: ->
