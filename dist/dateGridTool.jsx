@@ -95,7 +95,10 @@
       }
       app = div({
         onClick: this.props.allDaySelected,
-        className: className
+        className: className,
+        onMouseDown: this.props.onMouseDown,
+        onMouseOver: this.props.onMouseOver,
+        onMouseUp: this.props.onMouseUp
       });
       return app;
     }
@@ -125,6 +128,9 @@
         startHour: null,
         endHour: null,
         seleted: false,
+        startAllDay: null,
+        endAllDay: null,
+        allDaySeleted: false,
         result: result
       };
     },
@@ -199,6 +205,66 @@
         result: this.state.result
       });
     },
+    handleAllDayMouseDown: function(day) {
+      this.state.allDaySelected = !day.allDaySelected;
+      console.log("@state.allDaySelected", this.state.allDaySelected);
+      return this.setState({
+        startAllDay: day,
+        allDaySelected: this.state.allDaySelected
+      });
+    },
+    handleAllDayMouseOver: function(day) {
+      var changeHour, that;
+      that = this;
+      if (this.state.startAllDay === null) {
+        return;
+      }
+      this.state.endAllDay = day;
+      changeHour = [];
+      this.state.result.map(function(day) {
+        var d, _i, _ref, _ref1, _results;
+        _results = [];
+        for (d = _i = _ref = that.state.startAllDay.day, _ref1 = that.state.endAllDay.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
+          if (that.state.result[d].day === d) {
+            _results.push(that.state.result[d].hours.forEach(function(hour) {
+              return changeHour.push(hour);
+            }));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      });
+      this.state.result.map(function(day) {
+        var allDaySelected;
+        allDaySelected = true;
+        day.hours.map(function(hour) {
+          if (__indexOf.call(changeHour, hour) >= 0) {
+            hour.selected = that.state.allDaySelected;
+          } else {
+            hour.selected = hour.orgSelected;
+          }
+          if (!hour.selected) {
+            return allDaySelected = false;
+          }
+        });
+        return day.allDaySelected = allDaySelected;
+      });
+      return this.setState({
+        result: this.state.result
+      });
+    },
+    handleAllDayMouseUp: function(day) {
+      this.state.result.forEach(function(day) {
+        return day.hours.forEach(function(hour) {
+          return hour.orgSelected = hour.selected;
+        });
+      });
+      return this.setState({
+        startAllDay: null,
+        endAllDay: null
+      });
+    },
     render: function() {
       var app, days, that;
       that = this;
@@ -213,10 +279,15 @@
           };
           return DateCell(hourProps);
         });
-        that.hours.push(AllDay({
-          day: day,
-          allDaySelected: that.allDaySelected.bind(that, day)
-        }));
+        if (day.day !== 7) {
+          that.hours.push(AllDay({
+            day: day,
+            allDaySelected: that.allDaySelected.bind(that, day),
+            onMouseDown: that.handleAllDayMouseDown.bind(that, day),
+            onMouseOver: that.handleAllDayMouseOver.bind(that, day),
+            onMouseUp: that.handleAllDayMouseUp.bind(that, day)
+          }));
+        }
         return DateRow({
           day: day
         }, that.hours);
@@ -325,6 +396,12 @@
     }, {
       title: "Sunday",
       day: 6,
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
+    }, {
+      title: "Every Day ",
+      day: 7,
       hours: [],
       allDaySelected: false,
       allHourSelected: false
