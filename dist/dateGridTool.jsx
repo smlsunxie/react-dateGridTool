@@ -1,5 +1,5 @@
 (function() {
-  var DateCell, DateGridToolApp, DateRow, dataObj, dateGridToolApp, div,
+  var AllDay, DateCell, DateGridToolApp, DateRow, dataObj, dateGridToolApp, div,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   div = React.DOM.div;
@@ -77,6 +77,30 @@
     }
   });
 
+  AllDay = React.createClass({
+    getInitialState: function() {
+      return {
+        day: this.props.day
+      };
+    },
+    render: function() {
+      var app, className, selectdClassName;
+      className = "bt-view bt-view _8-w";
+      selectdClassName = "";
+      if (this.state.day.allDaySelected === true) {
+        selectdClassName = "hourStatus-selected";
+      }
+      if (selectdClassName !== "") {
+        className += " " + selectdClassName;
+      }
+      app = div({
+        onClick: this.props.allDaySelected,
+        className: className
+      });
+      return app;
+    }
+  });
+
   DateGridToolApp = React.createClass({
     hours: [],
     getInitialState: function() {
@@ -131,13 +155,19 @@
           }
         }
         this.state.result.map(function(day) {
-          return day.hours.map(function(hour) {
+          var allDaySelected;
+          allDaySelected = true;
+          day.hours.map(function(hour) {
             if (__indexOf.call(changeHour, hour) >= 0) {
-              return hour.selected = that.state.selected;
+              hour.selected = that.state.selected;
             } else {
-              return hour.selected = hour.orgSelected;
+              hour.selected = hour.orgSelected;
+            }
+            if (!hour.selected) {
+              return allDaySelected = false;
             }
           });
+          return day.allDaySelected = allDaySelected;
         });
       }
       return this.setState({
@@ -157,6 +187,18 @@
         result: this.state.result
       });
     },
+    allDaySelected: function(day) {
+      var that;
+      that = this;
+      day.allDaySelected = !day.allDaySelected;
+      day.hours.map(function(hour) {
+        hour.selected = day.allDaySelected;
+        return hour.orgSelected = hour.selected;
+      });
+      return this.setState({
+        result: this.state.result
+      });
+    },
     render: function() {
       var app, days, that;
       that = this;
@@ -171,6 +213,10 @@
           };
           return DateCell(hourProps);
         });
+        that.hours.push(AllDay({
+          day: day,
+          allDaySelected: that.allDaySelected.bind(that, day)
+        }));
         return DateRow({
           day: day
         }, that.hours);
@@ -230,7 +276,9 @@
             className: "_8-z"
           }, ""), div({
             className: "_8-z"
-          }, "")
+          }, ""), div({
+            className: "_8_p"
+          }, "All Day")
         ]), div(null, days)
       ]);
       return app;
@@ -241,31 +289,45 @@
     {
       title: "Monday",
       day: 0,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }, {
       title: "Tuesday",
       day: 1,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }, {
       title: "Wednesday",
       day: 2,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }, {
       title: "Thursday",
       day: 3,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }, {
       title: "Friday",
       day: 4,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }, {
       title: "Saturday",
       day: 5,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }, {
       title: "Sunday",
       day: 6,
-      hours: []
+      hours: [],
+      allDaySelected: false,
+      allHourSelected: false
     }
   ];
 
