@@ -31,7 +31,8 @@ DateCell = React.createClass(
       onMouseDown: @props.onMouseDown
       onMouseOver: @props.onMouseOver
       onMouseUp: @props.onMouseUp
-      onClick: @setSelected
+      onClick: @props?.onClick || @setSelected
+
       className: className
 
     )
@@ -79,14 +80,12 @@ AllDay = React.createClass(
 
     className = "bt-view bt-view _8-w"
 
-
-
     selectdClassName = ""
-    selectdClassName = "hourStatus-selected"  if @state.day.allDaySelected is true
+    selectdClassName = "hourStatus-selected"  if @state.day.selected is true
     className += " " + selectdClassName  if selectdClassName isnt ""
 
     app = div(
-      onClick: @props.allDaySelected
+      onClick: @props.onClick
       className: className
       onMouseDown: @props.onMouseDown
       onMouseOver: @props.onMouseOver
@@ -113,67 +112,67 @@ DateGridToolApp = React.createClass(
         )
 
     return {
-      startHour: null
-      endHour: null
+      start: null
+      end: null
       seleted: false
-
-      startAllDay: null
-      endAllDay: null
-      allDaySeleted: false
 
       result: result
     }
 
-  handleHourMouseDown: (hour) ->
-    @state.selected = !hour.selected
-    @setState {startHour: hour, result: @state.result, selected: @state.selected}
+  updateHoursStatus:(changeHour, selected) ->
+    that = @
+    @state.result.map (day) ->
 
+      allDaySelected = true
+      day.hours.map (hour) ->
 
-  handleHourMouseOver: (hour) ->
-    that = this
-    return if @state.startHour is null
-    @state.endHour = hour
+        if hour in changeHour
+          hour.selected = selected
+        else
+          hour.selected = hour.orgSelected
 
-    if @state.startHour isnt null && @state.endHour isnt null
+        unless hour.selected
+          allDaySelected = false
 
-      @state.startHour.selected = !@state.startHour.selected
+      day.selected = allDaySelected
 
-      changeHour = []
-
-      for d in [@state.startHour.day..@state.endHour.day]
-        for h in [@state.startHour.hour..@state.endHour.hour]
-          hourLocal = @state.result[d].hours[h]
-          if hourLocal.day is d && hourLocal.hour is h
-            changeHour.push hourLocal
-
-      @state.result.map (day) ->
-
-        allDaySelected = true
-        day.hours.map (hour) ->
-
-          if hour in changeHour
-            hour.selected = that.state.selected
-          else
-            hour.selected = hour.orgSelected
-
-          unless hour.selected
-            allDaySelected = false
-
-        day.allDaySelected = allDaySelected
-
-
-
-
-
-    @setState {endHour: @state.endHour, result: @state.result}
-
-
-  handleHourMouseUp: (hour) ->
+  syncHourStatus: () ->
     @state.result.forEach (day) ->
       day.hours.forEach (hour) ->
         hour.orgSelected = hour.selected
 
-    @setState {startHour: null, endHour: null, result: @state.result}
+  handleMouseUp: (hour) ->
+    @syncHourStatus()
+    @setState {start: null, end: null, selected: null}
+
+  handleMouseDown: (object) ->
+    console.log "object.selected", object.selected
+
+    @state.selected = !object.selected
+
+    console.log "@state.selected", @state.selected
+    @setState {start: object, selected: @state.selected}
+
+
+  handleHourMouseOver: (hour) ->
+    that = this
+    return if @state.start is null
+    @state.end = hour
+
+    if @state.start isnt null && @state.end isnt null
+
+      changeHour = []
+
+      for d in [@state.start.day..@state.end.day]
+        for h in [@state.start.hour..@state.end.hour]
+          hourLocal = @state.result[d].hours[h]
+          if hourLocal.day is d && hourLocal.hour is h
+            changeHour.push hourLocal
+
+      @updateHoursStatus(changeHour, that.state.selected)
+      @setState {end: @state.end, result: @state.result}
+
+
 
 
   allDaySelected:(day) ->
@@ -183,56 +182,55 @@ DateGridToolApp = React.createClass(
     day.hours.map (hour) ->
       hour.selected = day.allDaySelected
       hour.orgSelected = hour.selected
+
+
     @setState(result: @state.result)
-
-  handleAllDayMouseDown: (day) ->
-    @state.allDaySelected = !day.allDaySelected
-
-    console.log "@state.allDaySelected", @state.allDaySelected
-    @setState {startAllDay: day, allDaySelected: @state.allDaySelected}
 
 
 
   handleAllDayMouseOver: (day) ->
     that = this
-    return if @state.startAllDay is null
-    @state.endAllDay = day
+    return if @state.start is null
+    @state.end = day
+
+    if @state.end isnt null && @state.start isnt null
+
+      changeHour = []
+
+      @state.result.map (day) ->
+        for d in [that.state.start.day..that.state.end.day]
+          if that.state.result[d].day is d
+            that.state.result[d].hours.forEach (hour)->
+              changeHour.push hour
+
+      @updateHoursStatus(changeHour, that.state.selected)
 
 
-    changeHour = []
-
-    @state.result.map (day) ->
-      for d in [that.state.startAllDay.day..that.state.endAllDay.day]
-        if that.state.result[d].day is d
-
-          that.state.result[d].hours.forEach (hour)->
-            changeHour.push hour
+      @setState {result: @state.result}
 
 
-    @state.result.map (day) ->
 
-      allDaySelected = true
-      day.hours.map (hour) ->
+  everyDaySelected:(day, hour) ->
+    console.log "everyDaySelected", day, hour
 
-        if hour in changeHour
-          hour.selected = that.state.allDaySelected
-        else
-          hour.selected = hour.orgSelected
-
-        unless hour.selected
-          allDaySelected = false
-
-      day.allDaySelected = allDaySelected
-
-    @setState {result: @state.result}
+    that = @
+    day.allDaySelected = !day.allDaySelected
+    day.hours.map (hour) ->
+      hour.selected = day.allDaySelected
+      hour.orgSelected = hour.selected
 
 
-  handleAllDayMouseUp: (day) ->
-    @state.result.forEach (day) ->
-      day.hours.forEach (hour) ->
-        hour.orgSelected = hour.selected
+    @setState(result: @state.result)
 
-    @setState {startAllDay: null, endAllDay: null}
+
+
+
+
+
+
+
+
+
 
 
   render: ->
@@ -241,21 +239,32 @@ DateGridToolApp = React.createClass(
     days = @state.result.map (day) ->
 
       that.hours = day.hours.map (hour) ->
-        hourProps =
-          hour: hour
-          onMouseDown: that.handleHourMouseDown.bind(that, hour)
-          onMouseOver: that.handleHourMouseOver.bind(that, hour)
-          onMouseUp: that.handleHourMouseUp.bind(that, hour)
-        return DateCell(hourProps)
+
+        unless day.day is 7
+          hourProps =
+            hour: hour
+            onMouseDown: that.handleMouseDown.bind(that, hour)
+            onMouseOver: that.handleHourMouseOver.bind(that, hour)
+            onMouseUp: that.handleMouseUp.bind(that, hour)
+          return DateCell(hourProps)
+
+        else
+          hourProps =
+            hour: hour
+            onClick: that.everyDaySelected.bind(that, day, hour)
+            # onMouseDown: that.handleEveryDayMouseDown.bind(that, hour)
+            # onMouseOver: that.handleEveryDayMouseOver.bind(that, hour)
+            # onMouseUp: that.handleEveryDayMouseUp.bind(that, hour)
+          return DateCell(hourProps)
 
 
       unless day.day is 7
         that.hours.push AllDay({
           day: day
-          allDaySelected: that.allDaySelected.bind(that, day)
-          onMouseDown: that.handleAllDayMouseDown.bind(that, day)
+          onClick: that.allDaySelected.bind(that, day)
+          onMouseDown: that.handleMouseDown.bind(that, day)
           onMouseOver: that.handleAllDayMouseOver.bind(that, day)
-          onMouseUp: that.handleAllDayMouseUp.bind(that, day)
+          onMouseUp: that.handleMouseUp.bind(that, day)
 
         })
 
@@ -303,14 +312,14 @@ DateGridToolApp = React.createClass(
 )
 
 dataObj = [
-  {title: "Monday", day: 0, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Tuesday", day: 1, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Wednesday", day: 2, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Thursday", day: 3, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Friday", day: 4, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Saturday", day: 5, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Sunday", day: 6, hours: [], allDaySelected: false, allHourSelected: false}
-  {title: "Every Day ", day: 7, hours: [], allDaySelected: false, allHourSelected: false}
+  {title: "Monday", day: 0, hours: [], selected: false, allHourSelected: false}
+  {title: "Tuesday", day: 1, hours: [], selected: false, allHourSelected: false}
+  {title: "Wednesday", day: 2, hours: [], selected: false, allHourSelected: false}
+  {title: "Thursday", day: 3, hours: [], selected: false, allHourSelected: false}
+  {title: "Friday", day: 4, hours: [], selected: false, allHourSelected: false}
+  {title: "Saturday", day: 5, hours: [], selected: false, allHourSelected: false}
+  {title: "Sunday", day: 6, hours: [], selected: false, allHourSelected: false}
+  {title: "Every Day ", day: 7, hours: [], selected: false, allHourSelected: false}
 ]
 
 dateGridToolApp = DateGridToolApp({dataObj: dataObj})

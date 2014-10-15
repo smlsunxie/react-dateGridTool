@@ -18,7 +18,7 @@
       });
     },
     render: function() {
-      var app, className, selectdClassName;
+      var app, className, selectdClassName, _ref;
       className = "";
       if (this.state.hour.hour % 3 === 0) {
         className = "_516n _516l _516m";
@@ -41,7 +41,7 @@
         onMouseDown: this.props.onMouseDown,
         onMouseOver: this.props.onMouseOver,
         onMouseUp: this.props.onMouseUp,
-        onClick: this.setSelected,
+        onClick: ((_ref = this.props) != null ? _ref.onClick : void 0) || this.setSelected,
         className: className
       });
       return app;
@@ -87,14 +87,14 @@
       var app, className, selectdClassName;
       className = "bt-view bt-view _8-w";
       selectdClassName = "";
-      if (this.state.day.allDaySelected === true) {
+      if (this.state.day.selected === true) {
         selectdClassName = "hourStatus-selected";
       }
       if (selectdClassName !== "") {
         className += " " + selectdClassName;
       }
       app = div({
-        onClick: this.props.allDaySelected,
+        onClick: this.props.onClick,
         className: className,
         onMouseDown: this.props.onMouseDown,
         onMouseOver: this.props.onMouseOver,
@@ -125,73 +125,78 @@
         });
       });
       return {
-        startHour: null,
-        endHour: null,
+        start: null,
+        end: null,
         seleted: false,
-        startAllDay: null,
-        endAllDay: null,
-        allDaySeleted: false,
         result: result
       };
     },
-    handleHourMouseDown: function(hour) {
-      this.state.selected = !hour.selected;
+    updateHoursStatus: function(changeHour, selected) {
+      var that;
+      that = this;
+      return this.state.result.map(function(day) {
+        var allDaySelected;
+        allDaySelected = true;
+        day.hours.map(function(hour) {
+          if (__indexOf.call(changeHour, hour) >= 0) {
+            hour.selected = selected;
+          } else {
+            hour.selected = hour.orgSelected;
+          }
+          if (!hour.selected) {
+            return allDaySelected = false;
+          }
+        });
+        return day.selected = allDaySelected;
+      });
+    },
+    syncHourStatus: function() {
+      return this.state.result.forEach(function(day) {
+        return day.hours.forEach(function(hour) {
+          return hour.orgSelected = hour.selected;
+        });
+      });
+    },
+    handleMouseUp: function(hour) {
+      this.syncHourStatus();
       return this.setState({
-        startHour: hour,
-        result: this.state.result,
+        start: null,
+        end: null,
+        selected: null
+      });
+    },
+    handleMouseDown: function(object) {
+      console.log("object.selected", object.selected);
+      this.state.selected = !object.selected;
+      console.log("@state.selected", this.state.selected);
+      return this.setState({
+        start: object,
         selected: this.state.selected
       });
     },
     handleHourMouseOver: function(hour) {
       var changeHour, d, h, hourLocal, that, _i, _j, _ref, _ref1, _ref2, _ref3;
       that = this;
-      if (this.state.startHour === null) {
+      if (this.state.start === null) {
         return;
       }
-      this.state.endHour = hour;
-      if (this.state.startHour !== null && this.state.endHour !== null) {
-        this.state.startHour.selected = !this.state.startHour.selected;
+      this.state.end = hour;
+      if (this.state.start !== null && this.state.end !== null) {
         changeHour = [];
-        for (d = _i = _ref = this.state.startHour.day, _ref1 = this.state.endHour.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
-          for (h = _j = _ref2 = this.state.startHour.hour, _ref3 = this.state.endHour.hour; _ref2 <= _ref3 ? _j <= _ref3 : _j >= _ref3; h = _ref2 <= _ref3 ? ++_j : --_j) {
+        for (d = _i = _ref = this.state.start.day, _ref1 = this.state.end.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
+          for (h = _j = _ref2 = this.state.start.hour, _ref3 = this.state.end.hour; _ref2 <= _ref3 ? _j <= _ref3 : _j >= _ref3; h = _ref2 <= _ref3 ? ++_j : --_j) {
             hourLocal = this.state.result[d].hours[h];
             if (hourLocal.day === d && hourLocal.hour === h) {
               changeHour.push(hourLocal);
             }
           }
         }
-        this.state.result.map(function(day) {
-          var allDaySelected;
-          allDaySelected = true;
-          day.hours.map(function(hour) {
-            if (__indexOf.call(changeHour, hour) >= 0) {
-              hour.selected = that.state.selected;
-            } else {
-              hour.selected = hour.orgSelected;
-            }
-            if (!hour.selected) {
-              return allDaySelected = false;
-            }
-          });
-          return day.allDaySelected = allDaySelected;
+        this.updateHoursStatus(changeHour, that.state.selected);
+        return this.setState({
+          end: this.state.end,
+          result: this.state.result
         });
       }
-      return this.setState({
-        endHour: this.state.endHour,
-        result: this.state.result
-      });
-    },
-    handleHourMouseUp: function(hour) {
-      this.state.result.forEach(function(day) {
-        return day.hours.forEach(function(hour) {
-          return hour.orgSelected = hour.selected;
-        });
-      });
-      return this.setState({
-        startHour: null,
-        endHour: null,
-        result: this.state.result
-      });
     },
     allDaySelected: function(day) {
       var that;
@@ -205,64 +210,46 @@
         result: this.state.result
       });
     },
-    handleAllDayMouseDown: function(day) {
-      this.state.allDaySelected = !day.allDaySelected;
-      console.log("@state.allDaySelected", this.state.allDaySelected);
-      return this.setState({
-        startAllDay: day,
-        allDaySelected: this.state.allDaySelected
-      });
-    },
     handleAllDayMouseOver: function(day) {
       var changeHour, that;
       that = this;
-      if (this.state.startAllDay === null) {
+      if (this.state.start === null) {
         return;
       }
-      this.state.endAllDay = day;
-      changeHour = [];
-      this.state.result.map(function(day) {
-        var d, _i, _ref, _ref1, _results;
-        _results = [];
-        for (d = _i = _ref = that.state.startAllDay.day, _ref1 = that.state.endAllDay.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
-          if (that.state.result[d].day === d) {
-            _results.push(that.state.result[d].hours.forEach(function(hour) {
-              return changeHour.push(hour);
-            }));
-          } else {
-            _results.push(void 0);
+      this.state.end = day;
+      if (this.state.end !== null && this.state.start !== null) {
+        changeHour = [];
+        this.state.result.map(function(day) {
+          var d, _i, _ref, _ref1, _results;
+          _results = [];
+          for (d = _i = _ref = that.state.start.day, _ref1 = that.state.end.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
+            if (that.state.result[d].day === d) {
+              _results.push(that.state.result[d].hours.forEach(function(hour) {
+                return changeHour.push(hour);
+              }));
+            } else {
+              _results.push(void 0);
+            }
           }
-        }
-        return _results;
-      });
-      this.state.result.map(function(day) {
-        var allDaySelected;
-        allDaySelected = true;
-        day.hours.map(function(hour) {
-          if (__indexOf.call(changeHour, hour) >= 0) {
-            hour.selected = that.state.allDaySelected;
-          } else {
-            hour.selected = hour.orgSelected;
-          }
-          if (!hour.selected) {
-            return allDaySelected = false;
-          }
+          return _results;
         });
-        return day.allDaySelected = allDaySelected;
+        this.updateHoursStatus(changeHour, that.state.selected);
+        return this.setState({
+          result: this.state.result
+        });
+      }
+    },
+    everyDaySelected: function(day, hour) {
+      var that;
+      console.log("everyDaySelected", day, hour);
+      that = this;
+      day.allDaySelected = !day.allDaySelected;
+      day.hours.map(function(hour) {
+        hour.selected = day.allDaySelected;
+        return hour.orgSelected = hour.selected;
       });
       return this.setState({
         result: this.state.result
-      });
-    },
-    handleAllDayMouseUp: function(day) {
-      this.state.result.forEach(function(day) {
-        return day.hours.forEach(function(hour) {
-          return hour.orgSelected = hour.selected;
-        });
-      });
-      return this.setState({
-        startAllDay: null,
-        endAllDay: null
       });
     },
     render: function() {
@@ -271,21 +258,29 @@
       days = this.state.result.map(function(day) {
         that.hours = day.hours.map(function(hour) {
           var hourProps;
-          hourProps = {
-            hour: hour,
-            onMouseDown: that.handleHourMouseDown.bind(that, hour),
-            onMouseOver: that.handleHourMouseOver.bind(that, hour),
-            onMouseUp: that.handleHourMouseUp.bind(that, hour)
-          };
-          return DateCell(hourProps);
+          if (day.day !== 7) {
+            hourProps = {
+              hour: hour,
+              onMouseDown: that.handleMouseDown.bind(that, hour),
+              onMouseOver: that.handleHourMouseOver.bind(that, hour),
+              onMouseUp: that.handleMouseUp.bind(that, hour)
+            };
+            return DateCell(hourProps);
+          } else {
+            hourProps = {
+              hour: hour,
+              onClick: that.everyDaySelected.bind(that, day, hour)
+            };
+            return DateCell(hourProps);
+          }
         });
         if (day.day !== 7) {
           that.hours.push(AllDay({
             day: day,
-            allDaySelected: that.allDaySelected.bind(that, day),
-            onMouseDown: that.handleAllDayMouseDown.bind(that, day),
+            onClick: that.allDaySelected.bind(that, day),
+            onMouseDown: that.handleMouseDown.bind(that, day),
             onMouseOver: that.handleAllDayMouseOver.bind(that, day),
-            onMouseUp: that.handleAllDayMouseUp.bind(that, day)
+            onMouseUp: that.handleMouseUp.bind(that, day)
           }));
         }
         return DateRow({
@@ -361,49 +356,49 @@
       title: "Monday",
       day: 0,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Tuesday",
       day: 1,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Wednesday",
       day: 2,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Thursday",
       day: 3,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Friday",
       day: 4,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Saturday",
       day: 5,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Sunday",
       day: 6,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }, {
       title: "Every Day ",
       day: 7,
       hours: [],
-      allDaySelected: false,
+      selected: false,
       allHourSelected: false
     }
   ];
