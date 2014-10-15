@@ -1,157 +1,159 @@
 
 div = React.DOM.div
 DateCell = React.createClass(
+  getInitialState: ->
+    return {
+      hour: @props.hour
+    }
 
+  setSelected:() ->
 
-  hourMouseDown: ->
-    @props.handleHourMouseDown this
-    return
+    @state.hour.selected = !@state.hour.selected
+    @state.hour.orgSelected = @state.hour.selected
+    @setState({hour: @state.hour})
 
-  hourMouseOver: ->
-    @props.handleHourMouseOver this
-    return
-  hourMouseUp: ->
-    @props.handleHourMouseUp this
-    return
-
-  setSelected:(selected) ->
-    @props.setSelected this, selected
 
   render: ->
 
-
-
     className = ""
-    className = "_516n _516l _516m"  if @props.hour % 3 is 0
-    className = "_516p _516l _516m"  if @props.hour % 3 is 1
-    className = "_516o _516l _516m"  if @props.hour % 3 is 2
+    className = "_516n _516l _516m"  if @state.hour.hour % 3 is 0
+    className = "_516p _516l _516m"  if @state.hour.hour % 3 is 1
+    className = "_516o _516l _516m"  if @state.hour.hour % 3 is 2
 
     selectdClassName = ""
-    selectdClassName = "hourStatus-selected"  if @props.selected is true
+    selectdClassName = "hourStatus-selected"  if @state.hour.selected is true
 
-    @setSelected(@props.selected)
 
     className += " " + selectdClassName  if selectdClassName isnt ""
 
     app = div(
       id: "hourGrid"
-      onMouseDown: @hourMouseDown
-      onMouseOver: @hourMouseOver
-      onMouseUp: @hourMouseUp
-      onClick: @hourMouseUp
+      onMouseDown: @props.onMouseDown
+      onMouseOver: @props.onMouseOver
+      onMouseUp: @props.onMouseUp
+      onClick: @setSelected
       className: className
-      ref: "day_#{@props.day}_hour_#{@props.hour}"
+
     )
 
     return app
 )
 
 #
-DateRow = React.createClass(render: ->
-  that = @
+DateRow = React.createClass(
+  render: ->
+    that = @
 
-  className = ""
-  className = "_8-v _516k clearfix" if @props.day is 0
-  className = "_8-x _516k clearfix" if @props.day is 7
-  className = "_516k clearfix" if @props.day isnt 7 && @props.day isnt 0
+    className = ""
+    className = "_8-v _516k clearfix" if @props.day.day is 0
+    className = "_8-x _516k clearfix" if @props.day.day is 7
+    className = "_516k clearfix" if @props.day.day isnt 7 && @props.day.day isnt 0
 
 
-  app = div(className: className, [
 
-    div(className: "bt-view bt-view _516l _516q",
-      div(className: "_516r", @props.title)
-    )
+    app = div(className: className, [
 
-    div(className: "bt-view bt-view", @props.hours)
+      div(className: "bt-view bt-view _516l _516q",
+        div(className: "_516r", @props.day.title)
+      )
 
-  ])
+      div(className: "bt-view bt-view", @props.children)
 
-  return app
+    ])
+
+    return app
 )
 DateGridToolApp = React.createClass(
-
+  hours: []
   getInitialState: ->
 
-    result = [
-      {title: "Monday", day: 0, hours: []}
-      {title: "Tuesday", day: 1, hours: []}
-      {title: "Wednesday", day: 2, hours: []}
-      {title: "Thursday", day: 3, hours: []}
-      {title: "Friday", day: 4, hours: []}
-      {title: "Saturday", day: 5, hours: []}
-      {title: "Sunday", day: 6, hours: []}
-    ]
+    result = @props.dataObj
 
 
-    [0..6].forEach (dayId) ->
+    result.forEach (day) ->
       [0..23].forEach (hourId) ->
-        result[dayId].hours.push(
-          day: dayId
+        day.hours.push(
+          day: day.day
           hour: hourId
           selected: false
+          orgSelected: false
         )
 
     return {
       startHour: null
       endHour: null
+      seleted: false
       result: result
     }
 
   handleHourMouseDown: (hour) ->
+    @state.selected = !hour.selected
 
-    @setState startHour: hour.props
+
+
+    @setState {startHour: hour, result: @state.result, selected: @state.selected}
 
 
   handleHourMouseOver: (hour) ->
     return if @state.startHour is null
-    @setState endHour: hour.props
+    @state.endHour = hour
+
+    console.log "@state.endHour", @state.endHour
+
+    if @state.startHour isnt null && @state.endHour isnt null
+
+      @state.startHour.selected = !@state.startHour.selected
+
+      for d in [@state.startHour.day..@state.endHour.day]
+        for h in [@state.startHour.hour..@state.endHour.hour]
+
+          hourLocal = @state.result[d].hours[h]
+
+          if hourLocal.day is d && hourLocal.hour is h
+
+            hourLocal.selected = @state.selected
+          else
+            hourLocal.selected = hourLocal.orgSelected
+
+    console.log "@state.result[0].hours[1]", @state.result[0].hours[1]
+    @setState {endHour: @state.endHour, result: @state.result}
 
 
   handleHourMouseUp: (hour) ->
-    @setState {startHour: null, endHour: null}
+    updateAllOrgSelected = () ->
+      @state.result.forEach (day) ->
+        day.hour.forEach (hour) ->
+          hour.orgSelected = hour.selected
 
-  setSelected: (hour, selected) ->
-    @state.result[hour.props.day].hours[hour.props.hour].selected = selected
+    @setState {startHour: null, endHour: null, result: @state.result}
 
 
   render: ->
     that = this
 
+    days = @state.result.map (day) ->
 
-    days = [0..6].map (day) ->
-      dayObj =
-         day: day
-         title: that.state.result[day].title
-
-      dayObj.hours = [0..23].map (hour) ->
-
-        hourObj =
-          day: day
+      that.hours = day.hours.map (hour) ->
+        hourProps =
           hour: hour
-          handleHourMouseDown: that.handleHourMouseDown
-          handleHourMouseOver: that.handleHourMouseOver
-          handleHourMouseUp: that.handleHourMouseUp
-          setSelected: that.setSelected
-          selected: that.state.result[day].hours[hour].selected
-
-
-        if that.state.startHour isnt null && that.state.endHour isnt null
-
-
-          for d in [that.state.startHour.day..that.state.endHour.day]
-            for h in [that.state.startHour.hour..that.state.endHour.hour]
-              hourObj.selected = true if hourObj.day is d && hourObj.hour is h
-
-
-
-        return DateCell(hourObj)
-
-      return DateRow(dayObj)
+          onMouseDown: that.handleHourMouseDown.bind(that, hour)
+          onMouseOver: that.handleHourMouseOver.bind(that, hour)
+          onMouseUp: that.handleHourMouseUp.bind(that, hour)
 
 
 
 
-    app = div(className: "bt-view bt-view bt-day-parting-grid-view", [
+        return DateCell(hourProps)
+
+      return DateRow({day: day}, that.hours)
+
+
+
+
+    app = div({
+        className: "bt-view bt-view bt-day-parting-grid-view"
+        onClick: @log
+      }, [
       div(className: "_52t2 clearfix"  , [
         div(className: "_8-y", "12am")
         div(className: "_8-z", "")
@@ -183,6 +185,17 @@ DateGridToolApp = React.createClass(
 
     return app
 )
-dateGridToolApp = DateGridToolApp()
+
+dataObj = [
+  {title: "Monday", day: 0, hours: []}
+  {title: "Tuesday", day: 1, hours: []}
+  {title: "Wednesday", day: 2, hours: []}
+  {title: "Thursday", day: 3, hours: []}
+  {title: "Friday", day: 4, hours: []}
+  {title: "Saturday", day: 5, hours: []}
+  {title: "Sunday", day: 6, hours: []}
+]
+
+dateGridToolApp = DateGridToolApp({dataObj: dataObj})
 
 React.renderComponent dateGridToolApp, document.getElementById("test")
