@@ -1,7 +1,6 @@
 {
-  "name": "ng-date-grid-tool",
+  "name": "react-date-grid-tool",
   "version": "0.0.1",
-
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-coffee": "~0.10.1",
@@ -16,7 +15,7 @@
     "grunt-coffee-react": "~1.0.1"
   },
   "keywords": [
-    "angularjs",
+    "react",
     "datetime",
     "schedule"
   ],

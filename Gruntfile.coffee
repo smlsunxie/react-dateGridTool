@@ -10,31 +10,18 @@ module.exports = (grunt) ->
           pretty: true
         },
         files: {
-          'dist/dateGridTool.html': 'src/dateGridTool.jade'
           'example/index.html': 'src/example/index.jade'
         }
       },
     }
-    coffee: {
-      dev: {
-        options: {
-          bare: false
-        },
-        files: {
-          'dist/dateGridTool.js': 'src/dateGridTool.coffee'
-          'example/main.js': 'src/example/main.coffee'
-        }
-      }
-    },
 
     cjsx: {
       compile: {
         files: {
-          'dist/dateGridTool.jsx': 'src/dateGridTool.cjsx'
+          'dist/dateGridTool.js': 'src/dateGridTool.cjsx'
         }
       }
     },
-
 
 
     clean:
@@ -109,7 +96,6 @@ module.exports = (grunt) ->
   grunt.registerTask "build", [
     "clean"
     "jade"
-    "coffee"
     "cjsx"
     "copy:build"
     "copy:example"

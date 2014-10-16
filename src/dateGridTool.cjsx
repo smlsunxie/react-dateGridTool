@@ -6,11 +6,7 @@ DateCell = React.createClass(
       hour: @props.hour
     }
 
-  setSelected:() ->
 
-    @state.hour.selected = !@state.hour.selected
-    @state.hour.orgSelected = @state.hour.selected
-    @setState({hour: @state.hour})
 
 
   render: ->
@@ -121,20 +117,37 @@ DateGridToolApp = React.createClass(
 
   updateHoursStatus:(changeHour, selected) ->
     that = @
-    @state.result.map (day) ->
+
+    that.state.result[7].hours.forEach (hours) ->
+      hours.selected = true
+
+    @state.result.forEach (day) ->
 
       allDaySelected = true
-      day.hours.map (hour) ->
+      day.hours.forEach (hour) ->
 
-        if hour in changeHour
-          hour.selected = selected
-        else
-          hour.selected = hour.orgSelected
+        if day.day < 7
+          if hour in changeHour
+            hour.selected = selected
+          else
+            hour.selected = hour.orgSelected
 
-        unless hour.selected
-          allDaySelected = false
+          unless hour.selected
+            allDaySelected = false
+
+          if hour.day is day.day && hour.selected is false
+            that.state.result[7].hours[hour.hour].selected = false
+
+
+
+
+
 
       day.selected = allDaySelected
+
+
+
+
 
   syncHourStatus: () ->
     @state.result.forEach (day) ->
@@ -146,11 +159,7 @@ DateGridToolApp = React.createClass(
     @setState {start: null, end: null, selected: null}
 
   handleMouseDown: (object) ->
-    console.log "object.selected", object.selected
-
     @state.selected = !object.selected
-
-    console.log "@state.selected", @state.selected
     @setState {start: object, selected: @state.selected}
 
 
@@ -178,9 +187,9 @@ DateGridToolApp = React.createClass(
   allDaySelected:(day) ->
 
     that = @
-    day.allDaySelected = !day.allDaySelected
-    day.hours.map (hour) ->
-      hour.selected = day.allDaySelected
+    day.selected = !day.selected
+    day.hours.forEach (hour) ->
+      hour.selected = day.selected
       hour.orgSelected = hour.selected
 
 
@@ -197,7 +206,7 @@ DateGridToolApp = React.createClass(
 
       changeHour = []
 
-      @state.result.map (day) ->
+      @state.result.forEach (day) ->
         for d in [that.state.start.day..that.state.end.day]
           if that.state.result[d].day is d
             that.state.result[d].hours.forEach (hour)->
@@ -210,26 +219,49 @@ DateGridToolApp = React.createClass(
 
 
 
-  everyDaySelected:(day, hour) ->
-    console.log "everyDaySelected", day, hour
+  everyDaySelected:(everyDayHour) ->
 
     that = @
-    day.allDaySelected = !day.allDaySelected
-    day.hours.map (hour) ->
-      hour.selected = day.allDaySelected
-      hour.orgSelected = hour.selected
+    everyDayHour.selectd = !everyDayHour.selectd
+
+    that.state.result.forEach (day) ->
+      day.hours.forEach (hour) ->
+
+        if everyDayHour.hour is hour.hour
+
+          hour.selected = everyDayHour.selectd
+          hour.orgSelected = hour.selected
 
 
     @setState(result: @state.result)
 
 
 
+  handleEveryDayMouseOver: (everyDayHour) ->
+    that = this
+    return if @state.start is null
+    @state.end = everyDayHour
+
+    if @state.end isnt null && @state.start isnt null
+
+      changeHour = []
 
 
+      @state.result.forEach (day) ->
+        day.hours.forEach (hour) ->
+
+          if hour.hour in [that.state.start.hour..that.state.end.hour]
+            changeHour.push hour
+
+      @updateHoursStatus(changeHour, that.state.selected)
 
 
+      @setState {result: @state.result}
 
+  hourSelected:(hour) ->
 
+    @updateHoursStatus([hour], !hour.selected)
+    @setState({hour: @state.hour})
 
 
 
@@ -243,6 +275,7 @@ DateGridToolApp = React.createClass(
         unless day.day is 7
           hourProps =
             hour: hour
+            onClick: that.hourSelected.bind(that, hour)
             onMouseDown: that.handleMouseDown.bind(that, hour)
             onMouseOver: that.handleHourMouseOver.bind(that, hour)
             onMouseUp: that.handleMouseUp.bind(that, hour)
@@ -251,10 +284,11 @@ DateGridToolApp = React.createClass(
         else
           hourProps =
             hour: hour
-            onClick: that.everyDaySelected.bind(that, day, hour)
-            # onMouseDown: that.handleEveryDayMouseDown.bind(that, hour)
-            # onMouseOver: that.handleEveryDayMouseOver.bind(that, hour)
-            # onMouseUp: that.handleEveryDayMouseUp.bind(that, hour)
+            onClick: that.everyDaySelected.bind(that, hour)
+            onMouseDown: that.handleMouseDown.bind(that, hour)
+            onMouseOver: that.handleEveryDayMouseOver.bind(that, hour)
+            onMouseUp: that.handleMouseUp.bind(that, hour)
+
           return DateCell(hourProps)
 
 
@@ -322,6 +356,8 @@ dataObj = [
   {title: "Every Day ", day: 7, hours: [], selected: false, allHourSelected: false}
 ]
 
-dateGridToolApp = DateGridToolApp({dataObj: dataObj})
 
+
+
+dateGridToolApp = DateGridToolApp({dataObj: dataObj})
 React.renderComponent dateGridToolApp, document.getElementById("test")

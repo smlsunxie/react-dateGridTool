@@ -1,5 +1,5 @@
 {
-  "name": "ng-date-grid-tool",
+  "name": "react-date-grid-tool",
   "version": "0.0.1",
   "description": "Schedule datetime define tool",
   "keywords": [
@@ -8,12 +8,10 @@
     "datetimepicker"
   ],
   "authors": [
-    "smlsunxie",
-    "mak"
+    "smlsunxie"
   ],
   "license": "MIT",
   "main": [
-    "dist/dateGridTool.css",
     "dist/dateGridTool.js"
   ],
   "ignore": [

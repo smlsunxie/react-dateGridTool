@@ -10,13 +10,6 @@
         hour: this.props.hour
       };
     },
-    setSelected: function() {
-      this.state.hour.selected = !this.state.hour.selected;
-      this.state.hour.orgSelected = this.state.hour.selected;
-      return this.setState({
-        hour: this.state.hour
-      });
-    },
     render: function() {
       var app, className, selectdClassName, _ref;
       className = "";
@@ -134,17 +127,25 @@
     updateHoursStatus: function(changeHour, selected) {
       var that;
       that = this;
-      return this.state.result.map(function(day) {
+      that.state.result[7].hours.forEach(function(hours) {
+        return hours.selected = true;
+      });
+      return this.state.result.forEach(function(day) {
         var allDaySelected;
         allDaySelected = true;
-        day.hours.map(function(hour) {
-          if (__indexOf.call(changeHour, hour) >= 0) {
-            hour.selected = selected;
-          } else {
-            hour.selected = hour.orgSelected;
-          }
-          if (!hour.selected) {
-            return allDaySelected = false;
+        day.hours.forEach(function(hour) {
+          if (day.day < 7) {
+            if (__indexOf.call(changeHour, hour) >= 0) {
+              hour.selected = selected;
+            } else {
+              hour.selected = hour.orgSelected;
+            }
+            if (!hour.selected) {
+              allDaySelected = false;
+            }
+            if (hour.day === day.day && hour.selected === false) {
+              return that.state.result[7].hours[hour.hour].selected = false;
+            }
           }
         });
         return day.selected = allDaySelected;
@@ -166,9 +167,7 @@
       });
     },
     handleMouseDown: function(object) {
-      console.log("object.selected", object.selected);
       this.state.selected = !object.selected;
-      console.log("@state.selected", this.state.selected);
       return this.setState({
         start: object,
         selected: this.state.selected
@@ -201,9 +200,9 @@
     allDaySelected: function(day) {
       var that;
       that = this;
-      day.allDaySelected = !day.allDaySelected;
-      day.hours.map(function(hour) {
-        hour.selected = day.allDaySelected;
+      day.selected = !day.selected;
+      day.hours.forEach(function(hour) {
+        hour.selected = day.selected;
         return hour.orgSelected = hour.selected;
       });
       return this.setState({
@@ -219,7 +218,7 @@
       this.state.end = day;
       if (this.state.end !== null && this.state.start !== null) {
         changeHour = [];
-        this.state.result.map(function(day) {
+        this.state.result.forEach(function(day) {
           var d, _i, _ref, _ref1, _results;
           _results = [];
           for (d = _i = _ref = that.state.start.day, _ref1 = that.state.end.day; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; d = _ref <= _ref1 ? ++_i : --_i) {
@@ -239,17 +238,53 @@
         });
       }
     },
-    everyDaySelected: function(day, hour) {
+    everyDaySelected: function(everyDayHour) {
       var that;
-      console.log("everyDaySelected", day, hour);
       that = this;
-      day.allDaySelected = !day.allDaySelected;
-      day.hours.map(function(hour) {
-        hour.selected = day.allDaySelected;
-        return hour.orgSelected = hour.selected;
+      everyDayHour.selectd = !everyDayHour.selectd;
+      that.state.result.forEach(function(day) {
+        return day.hours.forEach(function(hour) {
+          if (everyDayHour.hour === hour.hour) {
+            hour.selected = everyDayHour.selectd;
+            return hour.orgSelected = hour.selected;
+          }
+        });
       });
       return this.setState({
         result: this.state.result
+      });
+    },
+    handleEveryDayMouseOver: function(everyDayHour) {
+      var changeHour, that;
+      that = this;
+      if (this.state.start === null) {
+        return;
+      }
+      this.state.end = everyDayHour;
+      if (this.state.end !== null && this.state.start !== null) {
+        changeHour = [];
+        this.state.result.forEach(function(day) {
+          return day.hours.forEach(function(hour) {
+            var _i, _ref, _ref1, _ref2, _results;
+            if (_ref = hour.hour, __indexOf.call((function() {
+              _results = [];
+              for (var _i = _ref1 = that.state.start.hour, _ref2 = that.state.end.hour; _ref1 <= _ref2 ? _i <= _ref2 : _i >= _ref2; _ref1 <= _ref2 ? _i++ : _i--){ _results.push(_i); }
+              return _results;
+            }).apply(this), _ref) >= 0) {
+              return changeHour.push(hour);
+            }
+          });
+        });
+        this.updateHoursStatus(changeHour, that.state.selected);
+        return this.setState({
+          result: this.state.result
+        });
+      }
+    },
+    hourSelected: function(hour) {
+      this.updateHoursStatus([hour], !hour.selected);
+      return this.setState({
+        hour: this.state.hour
       });
     },
     render: function() {
@@ -261,6 +296,7 @@
           if (day.day !== 7) {
             hourProps = {
               hour: hour,
+              onClick: that.hourSelected.bind(that, hour),
               onMouseDown: that.handleMouseDown.bind(that, hour),
               onMouseOver: that.handleHourMouseOver.bind(that, hour),
               onMouseUp: that.handleMouseUp.bind(that, hour)
@@ -269,7 +305,10 @@
           } else {
             hourProps = {
               hour: hour,
-              onClick: that.everyDaySelected.bind(that, day, hour)
+              onClick: that.everyDaySelected.bind(that, hour),
+              onMouseDown: that.handleMouseDown.bind(that, hour),
+              onMouseOver: that.handleEveryDayMouseOver.bind(that, hour),
+              onMouseUp: that.handleMouseUp.bind(that, hour)
             };
             return DateCell(hourProps);
           }
